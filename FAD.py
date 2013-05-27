@@ -6,7 +6,7 @@ opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
 urllib2.install_opener(opener)
 
 
-account = "userid=maox12&userpass=Myahoo445&submit1=%B5%C7%C2%BC"
+account = "userid=&userpass=&submit1=%B5%C7%C2%BC"
 url_login = "https://learn.tsinghua.edu.cn/MultiLanguage/lesson/teacher/loginteacher.jsp"
 url_all_index = "http://learn.tsinghua.edu.cn/MultiLanguage/lesson/student/MyCourse.jsp?language=cn"
 
