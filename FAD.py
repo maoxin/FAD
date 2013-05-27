@@ -187,7 +187,7 @@ def download(course, item):
             
         print "\"", unicode(item[2], 'utf-8'), "\"", "to be download: \n"
         # we can do something intersting more!! 
-        print unicode("-*-勇敢的少年请耐心，少女默默祈祷中-*-", 'utf-8')
+        print unicode("-*-勇敢的少年请耐心，少女努力祈祷中-*-", 'utf-8')
         
         d_url = "http://learn.tsinghua.edu.cn" + item[1]
         temp = urllib2.urlopen(d_url)
