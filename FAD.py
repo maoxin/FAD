@@ -1,13 +1,13 @@
 #coding:utf-8
 import urllib2, cookielib, re, os
 
-cj     = cookielib.CookieJar()
+cj = cookielib.CookieJar()
 opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
 urllib2.install_opener(opener)
 
 
-account       = "userid=&userpass=&submit1=%B5%C7%C2%BC"
-url_login     = "https://learn.tsinghua.edu.cn/MultiLanguage/lesson/teacher/loginteacher.jsp"
+account = "userid=&userpass=&submit1=%B5%C7%C2%BC"
+url_login = "https://learn.tsinghua.edu.cn/MultiLanguage/lesson/teacher/loginteacher.jsp"
 url_all_index = "http://learn.tsinghua.edu.cn/MultiLanguage/lesson/student/MyCourse.jsp?language=cn"
 
 
@@ -22,15 +22,12 @@ def login_index():
 def new_info(index):
     for course in index:
         new = False
-        
         for i in range(2, 5):
             if course[i] != "0":
                 new = True
                 break
-        
         if new == True:
             print 'Course Name:',           unicode(course[1], 'utf-8')
-            
             if course[2] != '0':
                 print 'Unhanded works:',    course[2]
             if course[3] != '0':
@@ -44,23 +41,21 @@ def new_info(index):
 
 def new_bulletins(index):    
     count = 0
-    
     for course in index:
         count += int(course[3])
-    
-    if count == 0:
-        print "Ok! You have already read them.."
-    else:
-        print "Hey! There are %d new bulletins!\n" % count
-        print "********************************\n" 
+    # if count == 0:
+        # print "Ok! You have already read them.."
+    # else:
+        # print "Hey! There are %d new bulletins!\n" % count
+        # print "********************************\n"
         count = 0
-    # if 1>0:
+    if 1>0:
 
         for course in index:
-            if course[3] != '0':
-            # if 1>0:
+            # if course[3] != '0':
+            if 1>0:
                 count_one_piece = 1
-                bulletins_url   = "http://learn.tsinghua.edu.cn/MultiLanguage/public/bbs/getnoteid_student.jsp?course_id=%d" % int(course[0])
+                bulletins_url = "http://learn.tsinghua.edu.cn/MultiLanguage/public/bbs/getnoteid_student.jsp?course_id=%d" % int(course[0])
                 bulletins_index = urllib2.urlopen(bulletins_url)
                 bulletins_index = tidy_index_bulletins(bulletins_index)
             
@@ -68,12 +63,13 @@ def new_bulletins(index):
                 print "You have %d new bulletins..\n" % int(course[3])
             
                 for item in bulletins_index:
-                    if item[5] != '已读':
-                    # if 1>0:  
-                        b_url    = "http://learn.tsinghua.edu.cn/MultiLanguage/public/bbs/" + item[1]
+                    # if item[5] != '已读':
+                    if 1>0:  
+                        b_url = "http://learn.tsinghua.edu.cn/MultiLanguage/public/bbs/" + item[1]
                         bulletin = text_view(urllib2.urlopen(b_url)).strip()
                         bulletin_time(course[1], item[4])
-                        b_file   = '/Users/apple/Downloads/subject_downloads/%s/bulletins/%s/%s.txt' % (course[1],item[4], find_title(bulletin))
+                        b_file = '/Users/apple/Downloads/subject_downloads/bulletins/%s/%s/%s.txt' % (course[1],item[4], find_title(bulletin))
+                        
                         try:
                             file = open(b_file)
                             file.close()
@@ -81,7 +77,7 @@ def new_bulletins(index):
                             file = open(b_file, 'w')
                             file.write(bulletin)
                             file.close()
-                            
+                        
                         print str(count_one_piece) + "."
                         print item[4] + "\n"
                         print unicode(bulletin, 'utf-8') + "\n\n"
@@ -98,10 +94,8 @@ def new_downloads(index):
     count = 0
     for course in index:
         count += int(course[4])
-    
     if count == 0:
         print "Oh..There's no file left.."
-    
     else:
         print "You have %d new files to pick up!" % count
         count = 0                 # download based on prompt.
@@ -173,21 +167,34 @@ def download(course, item):
     file_name = pat_3.sub(r':', item[2])
     
     exist = False
-    file_name = '/Users/apple/Downloads/subject_downloads/%s/%s%s' % (course[1], file_name, item[0])
+    file_name_1 = '/Users/apple/Downloads/subject_downloads/%s/%s%s' % (course[1], file_name, item[0])
     
     try:
-        file = open(file_name)
+        file = open(file_name_1)
         file.close()
+        if item[4] == '新文件':
+            file_name_1 = '/Users/apple/Downloads/subject_downloads/%s/%s%s' % (course[1], file_name + '2', item[0])
+            file = open(file_name_1, 'wb')
+            
+            print "\"", unicode(item[2], 'utf-8'), "\"", "to be download: \n"
+            print unicode("-*-勇敢的少年请耐心，少女努力祈祷中-*-", 'utf-8')
         
-        exist = True
+            d_url = "http://learn.tsinghua.edu.cn" + item[1]
+            temp = urllib2.urlopen(d_url)
+            file.write(temp.read())
+            file.close()
+        
+            print "\n" , "------Bingo!!------", "\n"
+        else:
+            exist = True
     
         
     except IOError:
-        file = open(file_name, 'wb')
+        file = open(file_name_1, 'wb')
             
         print "\"", unicode(item[2], 'utf-8'), "\"", "to be download: \n"
         # we can do something intersting more!! 
-        print unicode("-*-勇敢的少年请耐心，少女努力祈祷中-*-", 'utf-8')
+        print unicode("-*-勇敢的少年请耐心，少女默默祈祷中-*-", 'utf-8')
         
         d_url = "http://learn.tsinghua.edu.cn" + item[1]
         temp = urllib2.urlopen(d_url)
@@ -204,11 +211,14 @@ def download(course, item):
 
 def build_library(index):
     for course in index:
-        make_directory   = "mkdir /Users/apple/Downloads/subject_downloads/%s" % course[1]
-        make_directory_1 = "mkdir /Users/apple/Downloads/subject_downloads/%s/bulletins" % course[1]
+        make_directory   = "mkdir /Users/apple/Downloads/subject_downloads/files"
+        make_directory_1 = "mkdir /Users/apple/Downloads/subject_downloads/files/%s" % course[1]
+        make_directory_2 = "mkdir /Users/apple/Downloads/subject_downloads/bulletins"
+        make_directory_3 = "mkdir /Users/apple/Downloads/subject_downloads/bulletins/%s" % course[1]
         os.system(make_directory)
         os.system(make_directory_1)
-        
+        os.system(make_directory_2)
+        os.system(make_directory_3)
 
 def text_view(text):
     line_all = pure_world(text)
@@ -238,8 +248,10 @@ def find_title(text):
     return text
 
 def bulletin_time(course_name, time):
-    command = "mkdir /Users/apple/Downloads/subject_downloads/%s/bulletins/%s" % (course_name, time)
+    command   = "mkdir /Users/apple/Downloads/subject_downloads/bulletins/%s/%s" % (course_name, time)
+
     os.system(command)
+
 
 def pure_world(text):
     filter_purify_1 = r'(&nbsp;|&rsquo;|&ldquo;|&rdquo;|&mdash;|&gt;|&laquo;|&bull;|&hellip;|&raquo;)'
@@ -270,4 +282,5 @@ new_bulletins(login_index())
 
 
 # a log record what I did is needed.
+# we should save a duplicate of bulletin.
     
