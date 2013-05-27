@@ -1,12 +1,12 @@
 #coding:utf-8
-import urllib2, cookielib, re, os
+import urllib2, cookielib, re, subprocess
 
 cj = cookielib.CookieJar()
 opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
 urllib2.install_opener(opener)
 
 
-account = "userid=&userpass=&submit1=%B5%C7%C2%BC"
+account = "userid=maox12&userpass=Myahoo445&submit1=%B5%C7%C2%BC"
 url_login = "https://learn.tsinghua.edu.cn/MultiLanguage/lesson/teacher/loginteacher.jsp"
 url_all_index = "http://learn.tsinghua.edu.cn/MultiLanguage/lesson/student/MyCourse.jsp?language=cn"
 
@@ -43,17 +43,17 @@ def new_bulletins(index):
     count = 0
     for course in index:
         count += int(course[3])
-    # if count == 0:
-        # print "Ok! You have already read them.."
-    # else:
-        # print "Hey! There are %d new bulletins!\n" % count
-        # print "********************************\n"
+    if count == 0:
+        print "Ok! You have already read them.."
+    else:
+        print "Hey! There are %d new bulletins!\n" % count
+        print "********************************\n"
         count = 0
-    if 1>0:
+    # if 1>0:
 
         for course in index:
-            # if course[3] != '0':
-            if 1>0:
+            if course[3] != '0':
+            # if 1>0:
                 count_one_piece = 1
                 bulletins_url = "http://learn.tsinghua.edu.cn/MultiLanguage/public/bbs/getnoteid_student.jsp?course_id=%d" % int(course[0])
                 bulletins_index = urllib2.urlopen(bulletins_url)
@@ -63,8 +63,8 @@ def new_bulletins(index):
                 print "You have %d new bulletins..\n" % int(course[3])
             
                 for item in bulletins_index:
-                    # if item[5] != '已读':
-                    if 1>0:  
+                    if item[5] != '已读':
+                    # if 1>0:  
                         b_url = "http://learn.tsinghua.edu.cn/MultiLanguage/public/bbs/" + item[1]
                         bulletin = text_view(urllib2.urlopen(b_url)).strip()
                         bulletin_time(course[1], item[4])
@@ -215,10 +215,23 @@ def build_library(index):
         make_directory_1 = "mkdir /Users/apple/Downloads/subject_downloads/files/%s" % course[1]
         make_directory_2 = "mkdir /Users/apple/Downloads/subject_downloads/bulletins"
         make_directory_3 = "mkdir /Users/apple/Downloads/subject_downloads/bulletins/%s" % course[1]
-        os.system(make_directory)
-        os.system(make_directory_1)
-        os.system(make_directory_2)
-        os.system(make_directory_3)
+
+        try: 
+            subprocess.call(make_directory)
+        except OSError: 
+            pass
+        try:
+             subprocess.call(make_directory_1)
+        except OSError:
+             pass
+        try:
+             subprocess.call(make_directory_2)
+        except OSError: 
+            pass
+        try:
+             subprocess.call(make_directory_3)
+        except OSError: 
+            pass
 
 def text_view(text):
     line_all = pure_world(text)
@@ -250,7 +263,10 @@ def find_title(text):
 def bulletin_time(course_name, time):
     command   = "mkdir /Users/apple/Downloads/subject_downloads/bulletins/%s/%s" % (course_name, time)
 
-    os.system(command)
+    try: 
+        subprocess.call(command)
+    except OSError:
+        pass
 
 
 def pure_world(text):
@@ -271,7 +287,7 @@ def pure_world(text):
     return line_all
 
 
-# build_library(login_index())
+build_library(login_index())
 new_info(login_index())    
 new_downloads(login_index())
 new_bulletins(login_index())
