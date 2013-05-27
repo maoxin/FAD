@@ -148,29 +148,25 @@ def tidy_index_bulletins(index):
     return tidy_index(index, pat)
 
 def download(course, item):
+    pat_1 = re.compile(r'\(')
+    pat_2 = re.compile(r'\)')
+    pat_3 = re.compile(r'/')
+    # file_name = pat_1.sub('\(',item[2])
+    # file_name = pat_2.sub('\)', file_name)
+    file_name = pat_3.sub(r':', item[2])
+    
     exist = False
-    file_name = '/Users/apple/Downloads/subject_downloads/%s/%s%s' % (course[1], item[2], item[0])
-    file_name_second = '/Users/apple/Downloads/subject_downloads/%s/%s%s' %(course[1], item[2][-18:], item[0])
-    
+    file_name = '/Users/apple/Downloads/subject_downloads/%s/%s%s' % (course[1], file_name, item[0])
+    # print unicode(file_name, 'utf-8')
     try:
-        try:
-            file = open(file_name)
-            file.close()
+        file = open(file_name)
+        file.close()
         
-            exist = True
+        exist = True
     
-        except IOError:
-            file = open(file_name_second)
-            file.close()
-            
-            exist = True
         
     except IOError:
-        try:
-            file = open(file_name, 'wb')
-        except IOError:
-            print unicode(file_name_second, 'utf-8')
-            file = open(file_name_second, 'wb')
+        file = open(file_name, 'wb')
             
         print "\"", unicode(item[2], 'utf-8'), "\"", "to be download: \n"
         # we can do something intersting more!! 
