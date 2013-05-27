@@ -1,13 +1,13 @@
 #coding:utf-8
 import urllib2, cookielib, re, os
 
-cj = cookielib.CookieJar()
+cj     = cookielib.CookieJar()
 opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
 urllib2.install_opener(opener)
 
 
-account = "userid=&userpass=&submit1=%B5%C7%C2%BC"
-url_login = "https://learn.tsinghua.edu.cn/MultiLanguage/lesson/teacher/loginteacher.jsp"
+account       = "userid=&userpass=&submit1=%B5%C7%C2%BC"
+url_login     = "https://learn.tsinghua.edu.cn/MultiLanguage/lesson/teacher/loginteacher.jsp"
 url_all_index = "http://learn.tsinghua.edu.cn/MultiLanguage/lesson/student/MyCourse.jsp?language=cn"
 
 
@@ -22,12 +22,15 @@ def login_index():
 def new_info(index):
     for course in index:
         new = False
+        
         for i in range(2, 5):
             if course[i] != "0":
                 new = True
                 break
+        
         if new == True:
             print 'Course Name:',           unicode(course[1], 'utf-8')
+            
             if course[2] != '0':
                 print 'Unhanded works:',    course[2]
             if course[3] != '0':
@@ -41,19 +44,23 @@ def new_info(index):
 
 def new_bulletins(index):    
     count = 0
+    
     for course in index:
         count += int(course[3])
+    
     if count == 0:
         print "Ok! You have already read them.."
     else:
         print "Hey! There are %d new bulletins!\n" % count
-        print "********************************\n"
+        print "********************************\n" 
         count = 0
+    # if 1>0:
 
         for course in index:
             if course[3] != '0':
+            # if 1>0:
                 count_one_piece = 1
-                bulletins_url = "http://learn.tsinghua.edu.cn/MultiLanguage/public/bbs/getnoteid_student.jsp?course_id=%d" % int(course[0])
+                bulletins_url   = "http://learn.tsinghua.edu.cn/MultiLanguage/public/bbs/getnoteid_student.jsp?course_id=%d" % int(course[0])
                 bulletins_index = urllib2.urlopen(bulletins_url)
                 bulletins_index = tidy_index_bulletins(bulletins_index)
             
@@ -62,9 +69,19 @@ def new_bulletins(index):
             
                 for item in bulletins_index:
                     if item[5] != '已读':
-                        b_url = "http://learn.tsinghua.edu.cn/MultiLanguage/public/bbs/" + item[1]
-
+                    # if 1>0:  
+                        b_url    = "http://learn.tsinghua.edu.cn/MultiLanguage/public/bbs/" + item[1]
                         bulletin = text_view(urllib2.urlopen(b_url)).strip()
+                        bulletin_time(course[1], item[4])
+                        b_file   = '/Users/apple/Downloads/subject_downloads/%s/bulletins/%s/%s.txt' % (course[1],item[4], find_title(bulletin))
+                        try:
+                            file = open(b_file)
+                            file.close()
+                        except IOError:
+                            file = open(b_file, 'w')
+                            file.write(bulletin)
+                            file.close()
+                            
                         print str(count_one_piece) + "."
                         print item[4] + "\n"
                         print unicode(bulletin, 'utf-8') + "\n\n"
@@ -81,16 +98,18 @@ def new_downloads(index):
     count = 0
     for course in index:
         count += int(course[4])
-    # if count == 0:
-        # print "Oh..There's no file left.."
-    # else:
-    if 1>0:
+    
+    if count == 0:
+        print "Oh..There's no file left.."
+    
+    else:
         print "You have %d new files to pick up!" % count
-        count = 0
+        count = 0                 # download based on prompt.
+    # if 1>0:                         # download based on lack.
     
         for course in index:
-            # if course[4] != '0':  
-            if course[4] != 0:
+            if course[4] != '0':  
+            # if 1>0:
                 count_one_piece = 0
                 download_url   = "http://learn.tsinghua.edu.cn/MultiLanguage/lesson/student/download.jsp?course_id=%d" % int(course[0])
                 download_index = urllib2.urlopen(download_url)
@@ -98,8 +117,8 @@ def new_downloads(index):
         
                 print unicode(course[1], 'utf-8') ,"miss you!!\n"
                 for item in download_index:
-                    # if item[4] == '新文件':
-                    if 1>0:
+                    if item[4] == '新文件':
+                    # if 1>0:
                         if not download(course, item):
                             count_one_piece += 1
                             count += 1
@@ -151,13 +170,11 @@ def download(course, item):
     pat_1 = re.compile(r'\(')
     pat_2 = re.compile(r'\)')
     pat_3 = re.compile(r'/')
-    # file_name = pat_1.sub('\(',item[2])
-    # file_name = pat_2.sub('\)', file_name)
     file_name = pat_3.sub(r':', item[2])
     
     exist = False
     file_name = '/Users/apple/Downloads/subject_downloads/%s/%s%s' % (course[1], file_name, item[0])
-    # print unicode(file_name, 'utf-8')
+    
     try:
         file = open(file_name)
         file.close()
@@ -187,8 +204,10 @@ def download(course, item):
 
 def build_library(index):
     for course in index:
-        make_directory = "mkdir /Users/apple/Downloads/subject_downloads/%s" % course[1]
+        make_directory   = "mkdir /Users/apple/Downloads/subject_downloads/%s" % course[1]
+        make_directory_1 = "mkdir /Users/apple/Downloads/subject_downloads/%s/bulletins" % course[1]
         os.system(make_directory)
+        os.system(make_directory_1)
         
 
 def text_view(text):
@@ -198,14 +217,12 @@ def text_view(text):
     pat_2 = re.compile(r'(<br />|<td>|</td>|<p>|</p>)')  
     pat_3 = re.compile(r'&gt;=')
     pat_4 = re.compile(r'&lt;')
-    pat_purify_1 = re.compile(r'.*?(<p.*?>|<body.*?>)')
+    pat_purify_1 = re.compile(r'.*?</script>')
     pat_purify_2 = re.compile(r'(</body>|</p>).*')
-    pat_purify_3 = re.compile(r'.*?<tr><td.+?>标题</td><td.+?>(.*?)</td></tr><tr.*?><td.*?>(.*?)</td><td.+?<p>')
     pat_purify_4 = re.compile(r'<.*?>')
     
     line_all = pat_purify_1.sub(r'', line_all)
     line_all = pat_purify_2.sub(r'</p>', line_all)
-    line_all = pat_purify_3.sub(r'<td>\1</td><td>\2</td><p>', line_all)
     line_all = pat_1.sub(r'', line_all)
     line_all = pat_2.sub(r'\n', line_all)
     line_all = pat_3.sub(r'>=', line_all)
@@ -213,6 +230,16 @@ def text_view(text):
     line_all = pat_purify_4.sub(r'', line_all)
       
     return line_all
+
+def find_title(text):
+    pat = re.compile(r'标题\n(.*?)\n正文')
+    text = pat.match(text).group(1)
+    
+    return text
+
+def bulletin_time(course_name, time):
+    command = "mkdir /Users/apple/Downloads/subject_downloads/%s/bulletins/%s" % (course_name, time)
+    os.system(command)
 
 def pure_world(text):
     filter_purify_1 = r'(&nbsp;|&rsquo;|&ldquo;|&rdquo;|&mdash;|&gt;|&laquo;|&bull;|&hellip;|&raquo;)'
@@ -232,8 +259,8 @@ def pure_world(text):
     return line_all
 
 
-new_info(login_index())    
 # build_library(login_index())
+new_info(login_index())    
 new_downloads(login_index())
 new_bulletins(login_index())
 
@@ -243,5 +270,4 @@ new_bulletins(login_index())
 
 
 # a log record what I did is needed.
-# we should save a duplicate of bulletin.
     
